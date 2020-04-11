@@ -32,6 +32,7 @@ cf)[vscode](https://qiita.com/yoshiyasu1111/items/e21a77ed68b52cb5f7c8), [git](h
 - intelのアカウントが必要なのでとりあえず登録する
 
 下画像の様にlite版のlinuxを選択して、一式ファイルのQuartus Prime Lite Edition Software (Device support included) をダウンロード
+
 ![selection](./fig_macOS_Linux/Quartus_selection_field.png)
 ![downlaod](./fig_macOS_Linux/Quartus_download_field.png)
 
@@ -87,15 +88,17 @@ libxt6:i386 libxtst6:i386
 もちろんLinux環境なので動くはずないですし、そもそもLinux用のQuartusをダウンロードしているので **.exeファイルなんてないです。そこでダウンロードしたQuartusを見て行きます。defaultのままダウンロードしたのなら ~/intelFPGA_liteというディレクトリがあると思います。
 
 そこで~/intelFPGA_lite/19.1(download version) 以下を見てみましょう。
+
 ![9_1_tree](./fig_macOS_Linux/9_1_tree.png)
 
 おっ！ modelsim_aseがありました。
 
 次はmodelsim_ase/bin以下をみてみましょう。
+
 ![modelsim_ase_bin](./fig_macOS_Linux/modelsim_ase_bin.png)
 vlog.exe, vlib.exe, vsim.exeの代わりにvlog, vlib, vsimがあります。（やったね！）
 
-modelsim.exeの代わりはないですがとりあえず環境変数のpathはわかったでしょう。
+modelsim.exeの代わりはないですがとりあえず環境変数で設定すべきpathはわかりました。
 bashrcやbash_profileに以下の様に設定すれば、 tutorail/adder下のMakeでmake, make simが動きそうです。
 ```
 export H3_MODELSIM_PATH=~/intelFPGA_lite/19.1/modelsim_ase/bin
@@ -108,10 +111,12 @@ export H3_MODELSIM_PATH=~/intelFPGA_lite/19.1/modelsim_ase/bin
 うーん、では実際にvsimの中身をみてみると...
 
 変更前は210行の部分は"linux_60rh"になっていました。これはLinuxカーネルのversionによって分岐しているのですが、versionが4以降が全てlinux_60rhに分岐してしまいます。そこでここをまずは"linux"に変更しましょう。
+
 ![vsim](./fig_macOS_Linux/vsim.png)
 
 これで動くだろうと思ったが、やっぱり動かない...
 しょうがない[document](https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/manual/quartus_install.pdf)を読んで見よう。ふむふむどうやら以下の様に32bitのパッケージが必要な様だ。
+
 ![document](./fig_macOS_Linux/document.png)
 
 とりあえず32bitのアーキテクチャを追加して、書いてあるのを入れてみよう。
