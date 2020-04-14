@@ -3,6 +3,8 @@ H3_CYGWIN_MODELSIM_PATH = $(H3_MODELSIM_PATH)
 VLOG = $(H3_CYGWIN_MODELSIM_PATH)/vlog
 VLIB = $(H3_CYGWIN_MODELSIM_PATH)/vlib
 VSIM = $(H3_CYGWIN_MODELSIM_PATH)/vsim
+
+# modelsim does not exist
 # MODELSIM = $(H3_CYGWIN_MODELSIM_PATH)/modelsim.exe
 
 PROJECT_WORK = ModelSim
@@ -11,12 +13,14 @@ LIBRARY_WORK = $(PROJECT_WORK)/$(LIBRARY_NAME)
 
 # Library name and top-level module to be simulated
 LIBRARY_NAME    = H3_Modules
-TOPLEVEL_MODULE = H3_Simulator
+TOPLEVEL_MODULE = H3_RegAdderSim
 
 # Specify source files
 SOURCES = \
-	Sub.v \
-	SubSim.v \
+	Adder.v \
+	RegFile.v \
+	RegAdder.v \
+	RegAdderSim.v
 
 
 
@@ -41,8 +45,8 @@ all: $(DEPS) $(LIBRARY_WORK)
 
 # vlib LIBRARY
 clean:
-	mkdir $(PROJECT_WORK) -p
-	rm -f -r $(LIBRARY_WORK)
+	mkdir -p $(PROJECT_WORK)
+	rm -rf $(LIBRARY_WORK)
 	( cd $(PROJECT_WORK); $(VLIB) $(LIBRARY_NAME); )
 
 lib: clean
@@ -58,11 +62,6 @@ sim:
 
 # GUI simulation
 sim-gui:
-	( cd $(PROJECT_WORK); $(VSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) )
-
-
-
+	( cd $(PROJECT_WORK); $(VSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) -do "do wave.do; run 30ns"; )
 
 #	( cd $(WORK); $(VLOG) $(OPTIONS) $(DEPS); )
-
-

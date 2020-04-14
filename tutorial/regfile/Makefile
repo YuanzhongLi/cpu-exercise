@@ -1,9 +1,9 @@
-H3_CYGWIN_MODELSIM_PATH = $(shell cygpath -u "$$H3_MODELSIM_PATH")
+H3_CYGWIN_MODELSIM_PATH = $(H3_MODELSIM_PATH)
 
-VLOG = $(H3_CYGWIN_MODELSIM_PATH)/vlog.exe
-VLIB = $(H3_CYGWIN_MODELSIM_PATH)/vlib.exe
-VSIM = $(H3_CYGWIN_MODELSIM_PATH)/vsim.exe -c
-MODELSIM = $(H3_CYGWIN_MODELSIM_PATH)/modelsim.exe
+VLOG = $(H3_CYGWIN_MODELSIM_PATH)/vlog
+VLIB = $(H3_CYGWIN_MODELSIM_PATH)/vlib
+VSIM = $(H3_CYGWIN_MODELSIM_PATH)/vsim
+# MODELSIM = $(H3_CYGWIN_MODELSIM_PATH)/modelsim.exe
 
 PROJECT_WORK = ModelSim
 LIBRARY_WORK = $(PROJECT_WORK)/$(LIBRARY_NAME)
@@ -11,7 +11,7 @@ LIBRARY_WORK = $(PROJECT_WORK)/$(LIBRARY_NAME)
 
 # Library name and top-level module to be simulated
 LIBRARY_NAME    = H3_Modules
-TOPLEVEL_MODULE = H3_Simulator 
+TOPLEVEL_MODULE = H3_Simulator
 
 # Specify source files
 SOURCES = \
@@ -23,7 +23,7 @@ SOURCES = \
 DEPS = \
 	$(SOURCES) \
 
-#	+incdir+../../Src 
+#	+incdir+../../Src
 
 OPTIONS = \
 	-lint \
@@ -53,15 +53,14 @@ $(LIBRARY_WORK): Makefile
 
 # simulation
 # vsim LIBRARY -do "run -all"
-sim: 
+sim:
 	( cd $(PROJECT_WORK); $(VSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) -do "run -all"; )
 
 # GUI simulation
 # Read wave format by executing "do wave.do"
-sim-gui: 
-	( cd $(PROJECT_WORK); $(MODELSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) -do "do wave.do;";  )
-
-
+# run <時間>をいれる必要あり
+sim-gui:
+	( cd $(PROJECT_WORK); $(VSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) -do "do wave.do; run 230ns"; )
 
 
 #	( cd $(WORK); $(VLOG) $(OPTIONS) $(DEPS); )
