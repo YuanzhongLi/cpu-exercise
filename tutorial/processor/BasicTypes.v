@@ -8,7 +8,7 @@
 // --- 命令
 //
 
-// 命令幅は 32bit 
+// 命令幅は 32bit
 `define INSN_WIDTH 32
 `define InsnPath logic [ `INSN_WIDTH-1:0 ]
 
@@ -60,8 +60,8 @@
 //
 // IO
 //
-	
-	
+
+
 // LED
 `define LED_IN_WIDTH  4
 `define LED_OUT_WIDTH 8
@@ -142,8 +142,8 @@
 `define PICK_IO_ADDR( address ) (address[ 1 +:`IO_ADDR_WIDTH ]) //(`IO_ADDR_BEGIN + address)
 
 // アドレスマップ
-`define IO_ADDR_SORT_FINISH	`MAKE_IO_ADDR( 5'h0 )		// $4000: ソート終了 
-`define IO_ADDR_SORT_COUNT 	`MAKE_IO_ADDR( 5'h1 )		// $4002: ソート数   
+`define IO_ADDR_SORT_FINISH	`MAKE_IO_ADDR( 5'h0 )		// $4000: ソート終了
+`define IO_ADDR_SORT_COUNT 	`MAKE_IO_ADDR( 5'h1 )		// $4002: ソート数
 `define IO_ADDR_LAMP 		`MAKE_IO_ADDR( 5'h2 )		// $4004: ???
 `define IO_ADDR_LED_CTRL	`MAKE_IO_ADDR( 5'h3 )		// $4006: LED 制御
 														//   0 : サイクル数とソート数をLEDに表示

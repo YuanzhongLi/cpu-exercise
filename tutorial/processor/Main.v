@@ -8,7 +8,7 @@ module Main(
 	output `DD_OutArray  led,	// 7seg
 	output `DD_GateArray gate,	// 7seg gate
 	output `LampPath     lamp,	// Lamp?
-	
+
 	input logic clkBase,	// 4倍速クロック
 	input logic rst, 		// リセット（0でリセット）
 	input logic clkled   // LED用クロック
@@ -21,23 +21,23 @@ module Main(
 	// Clock/Reset
 	logic clkX4;
 	logic clk;
-	
+
 	// IMem
 	`InsnAddrPath imemAddr;			// アドレス出力
 	`InsnPath 	  imemDataToCPU;	// 命令コード
-	
+
 	// Data Memory
 	logic         dmemWrEnable;		// 書き込み有効
-	
+
 	// IOCtrl
 	logic         dataWE_Req;
-	
+
 	// データ
 	`DataPath     dataToCPU;		// 出力
 	`DataAddrPath dataAddr;			// アドレス
 	`DataPath     dataFromCPU;		// 入力
 	`DataPath     dataFromDMem;		// データメモリ読み出し
-	logic         dataWE_FromCPU;	
+	logic         dataWE_FromCPU;
 
 	// Clock divider
 	ClockDivider clockDivider(
@@ -45,7 +45,7 @@ module Main(
 		rst,
 		clkX4
 	);
-	
+
 	// IO
 	IOCtrl ioCtrl(
 		clkX4,
@@ -53,7 +53,7 @@ module Main(
 		rst,
 		dmemWrEnable,
 		dataToCPU,
-		
+
 		led,	// LED
 		gate,	// select 7seg
 		lamp,	// Lamp?
@@ -67,7 +67,7 @@ module Main(
 		sigCE,
 		sigCP
 	);
-	
+
 	// CPU
 	CPU cpu(
 		clk,
@@ -81,7 +81,7 @@ module Main(
 	);
 
 	// IMem
-	IMem imem( 
+	IMem imem(
 		clkX4, 			// メモリは4倍速
 		rst,
 		imemDataToCPU,
@@ -92,23 +92,23 @@ module Main(
 	DMem dmem(
 		clkX4,			// メモリは4倍速
 		rst,			// リセット
-		dataFromDMem,
-		dataAddr,
-		dataFromCPU,
-		dmemWrEnable
+		dataFromDMem, // out
+		dataAddr, // in
+		dataFromCPU, // in
+		dmemWrEnable // in
 	);
 
 	// Connections & multiplexers
 	always_comb begin
-		
+
 		// クロック
 		clkX4  = clkBase;
-		
+
 		// データメモリへの書き込みはクロックサイクル後半のみ有効
 		dataWE_Req = !clk && dataWE_FromCPU;
 
  	end
-	
+
 
 endmodule
 
