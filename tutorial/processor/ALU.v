@@ -5,7 +5,7 @@ module ALU(
 
   input `DataPath aluInA,
   input `DataPath aluInB,
-  input `ALUcodePath code
+  input `ALUCodePath code
 );
   always_comb begin
     case ( code )

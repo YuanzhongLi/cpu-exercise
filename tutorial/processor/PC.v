@@ -18,7 +18,7 @@ module PC(
 
 	`InsnAddrPath pc;
 
-	always_ff @( posedge clk or negedge rst ) begin　// rst 0のときリセット
+	always_ff @( posedge clk or negedge rst ) begin // rst 0のときリセット
 
 		if( !rst ) begin
 			pc <= `INSN_RESET_VECTOR;	// リセット

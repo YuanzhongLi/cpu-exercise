@@ -14,7 +14,7 @@ TOPLEVEL_MODULE = H3_MainSim
 
 # Specify source files
 SOURCES = \
-	ALU.v
+	ALU.v \
 	ClockDivider.v \
 	CPU.v \
 	DMem.v \

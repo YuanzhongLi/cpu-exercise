@@ -54,8 +54,7 @@
 `define EXPAND_BR_DISPLACEMENT(disp) \
 	{ disp[ `INSN_ADDR_WIDTH - 2 - 1 : 0 ], 2'b00 }
 
-本来はこうなる
-
+// 本来はこうなる
 // `define BR_DISPLACEMENT(disp) \
 // { \
 // 	(disp[ `CONSTAT_WIDTH - 1 ] ? 12'b111111111111 : 12'b000000000000),	// [31:19] \
