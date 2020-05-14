@@ -3,7 +3,6 @@
 module CPU(
 
 	input logic clk,	// クロック
-	// input logic clkX4, // 4 倍のクロック
 	input logic rst,	// リセット
 
 	output `InsnAddrPath insnAddr,		// 命令メモリへのアドレス出力
@@ -16,241 +15,135 @@ module CPU(
 	input  `DataPath     dataIn			// 読み出しデータ入力
 										// dataAddr で指定したアドレスから読んだ値が入力される．
 );
-	// pc
-	`InsnAddrPath addrIn;
+	// PC
+	`InsnAddrPath pcOut;		// アドレス出力
+	`InsnAddrPath pcIn;			// 外部書き込みをする時のアドレス
 	logic pcWrEnable;
+
+	// IMem
+	`InsnPath imemInsnCode; // 命令コード
+
+	// Decoder
+	`OpPath dcOp;				// OP フィールド
+	`RegNumPath dcRS;			// RS フィールド
+	`RegNumPath dcRT;			// RT フィールド
+	`RegNumPath dcRD;			// RD フィールド
+	`ShamtPath dcShamt;			// SHAMT フィールド
+	`FunctPath dcFunct;			// FUNCT フィールド
+	`ConstantPath dcConstat;	// CONSTANT フィールド
+
+	// Controll
+	`ALUCodePath dcALUCode;		// ALU の制御コード
+	`BrCodePath dcBrCode;		// ブランチの制御コード
+	logic dcIsSrcA_Rt;			// ソースの1個目が Rt かどうか
+	logic dcIsDstRt;			// ディスティネーションがRtかどうか
+	logic dcIsALUInConstant;	// ALU の入力が Constant かどうか
+	logic dcIsLoadInsn;			// ロード命令かどうか
+	logic dcIsStoreInsn;		// ストア命令かどうか
+
+	// レジスタ・ファイル
+	`DataPath rfRdDataS;		// 読み出しデータ rs
+	`DataPath rfRdDataT;		// 読み出しデータ rt
+	`DataPath   rfWrData;		// 書き込みデータ
+	`RegNumPath rfWrNum;		// 書き込み番号
+	logic       rfWrEnable;		// 書き込み制御 1の場合，書き込みを行う
+
+	// ALU
+	`DataPath aluOut;			// ALU 出力
+	`DataPath aluInA;			// ALU 入力A
+	`DataPath aluInB;			// ALU 入力B
+
+	// Branch
+	// BranchUnit 内で分岐かどうかを判断する変数なのでCPUではいらないのでは？
+	logic brTaken;
+
 	PC pc (
 		.clk( clk ), // in
 		.rst( rst ), // in
 
-		.addrOut( insnAddr ), // out
+		.addrOut( pcOut ), // out
 
-		.addrIn( addrIn ), // in: 外部書き込みのアドレス
+		.addrIn( pcIn ), // in: 外部書き込みのアドレス
 		.wrEnable( pcWrEnable ) // in
 	);
 
-	// alu
-	`DataPath aluOut;
+	// Branch Unit
+	BranchUnit branch(
+		.pcOut( pcIn ),	// out: BranchUnit への入力は in と out が逆になるのを注意
 
-	`DataPath aluInA;
-	`DataPath aluInB;
-	`ALUCodePath aluCodePath;
-
-	ALU alu (
-		.aluOut( aluOut ),
-
-		.aluInA( aluInA ),
-		.aluInB( aluInB ),
-		.code( aluCodePath )
+		.pcIn( pcOut ), // in
+		.brCode( dcBrCode ), // in
+		.regRS( rfRdDataS ), // in
+		.regRT( rfRdDataT ), // in
+		.constant( dcConstat ) // in
 	);
 
+	// Decoder
+	Decoder decoder(
+		.op( dcOp ), // out
+		.rs( dcRS ), // out
+		.rt( dcRT ), // out
+		.rd( dcRD ), // out
+		.shamt( dcShamt ), // out
+		.funct( dcFunct ), // out
+		.constat( dcConstat ), // out
+		.aluCode( dcALUCode ), // out
+		.brCode( dcBrCode ), // out
+		.pcWrEnable( pcWrEnable ), // out: PC 書き込みを行うかどうか
+		.isLoadInsn( dcIsLoadInsn ),	// out: ロード命令かどうか
+		.isStoreInsn( dcIsStoreInsn ),	// out: ストア命令かどうか
+		.isSrcA_Rt( dcIsSrcA_Rt ), // out: ソースの1個目が Rt かどうか
+		.isDstRt( dcIsDstRt ),	// out: ディスティネーションがRtかどうか
+		.rfWrEnable( rfWrEnable ),	// out: ディスティネーション書き込みを行うかどうか
+		.isALUInConstant( dcIsALUInConstant ),	// out :ALU の入力が Constant かどうか
 
-	// register file
-	`DataPath rdDataA;
-	`DataPath rdDataB;
-	`RegNumPath rdNumA;
-	`RegNumPath rdNumB;
-	`DataPath regFileWrData;
-	`RegNumPath regFileWrNum;
-	logic regFileWrEnable;
+		.insn( imemInsnCode ) // in
+	);
 
 	RegisterFile regFile(
 		.clk( clk ), // in
 
-		.rdDataA( rdDataA ), // out
-		.rdDataB( rdDataB ), // out
+		.rdDataA( rfRdDataS ), // out
+		.rdDataB( rfRdDataT ), // out
 
-		.rdNumA( rdNumA ), // in
-		.rdNumB( rdNumB ), // in
+		.rdNumA( dcRS ), // in
+		.rdNumB( dcRT ), // in
 
-		.wrData( regFileWrData ), // in
-		.wrNum( regFileWrNum ), // in
-		.wrEnable( regFileWrEnable ) // in
+		.wrData( rfWrData ), // in
+		.wrNum( rfWrNum ), // in
+		.wrEnable( rfWrEnable ) // in
 	);
 
+	ALU alu (
+		.aluOut( aluOut ), // out
 
+		.aluInA( aluInA ), // in
+		.aluInB( aluInB ), // in
+		.code( dcALUCode ) // in
+	);
 
-	`OpPath op;
-	`FunctPath funct;
-	`ShamtPath shamt;
-	`DataPath  shift;
-	`ConstantPath constant;
+	always_comb begin
+		// IMem
+		imemInsnCode = insn;
+		insnAddr     = pcOut;
 
-	`RegNumPath rs;
-	`RegNumPath rt;
-	`RegNumPath rd;
+		// DMem
+		dataOut = rfRdDataT;
+		dataAddr = rfRdDataS[ `DATA_ADDR_WIDTH - 1 : 0 ] + `EXPAND_ADDRESS( dcConstat );
 
-	`DataPath rsData;
-	`DataPath rtData;
-	`DataPath rdData;
+		// Register write data
+		rfWrData = dcIsLoadInsn ? dataIn : aluOut;
 
-	// 対macro用
-	`DataPath tmp;
+		// Register write num
+		rfWrNum = dcIsDstRt ? dcRT : dcRD;
 
-	always_ff @( posedge clk) begin
-		// ID
-		op = insn[`OP_POS+`OP_WIDTH-1 : `OP_POS];
-		funct = insn[ `FUNCT_POS+`FUNCT_WIDTH-1 : `FUNCT_POS ];
-		shamt = insn[ `SHAMT_POS+`SHAMT_WIDTH-1 : `SHAMT_POS ];
-		constant = `EXPAND_CONSTANT( insn );
+		// ALU
+		aluInA = dcIsSrcA_Rt ? rfRdDataT : rfRdDataS;
+		aluInB = dcIsALUInConstant ? dcConstat : rfRdDataT;
 
-		rs = insn[ `RS_POS+`REG_NUM_WIDTH-1 : `RS_POS ];
-		rt = insn[ `RT_POS+`REG_NUM_WIDTH-1 : `RT_POS ];
-		rd = insn[ `RD_POS+`REG_NUM_WIDTH-1 : `RD_POS ];
+		// DMem write enable;
+		dataWrEnable = dcIsStoreInsn;
 
-		// register fileからrt, rsの中身を取り出す
-		regFileWrEnable = `FALSE; // データの読み出しのみを行うので書き込み不可にする
-
-		rdNumA = rs;
-		rdNumB = rt;
-
-		rsData = rdDataA;
-		rtData = rdDataB;
-
-		// EX and
-		case ( op )
-			`OP_CODE_ALU: begin
-				pcWrEnable = `FALSE; // aluなのでpcの外部書き込みなし
-
-				if ( funct == `FUNCT_CODE_SLL ) begin // functによってaluでの処理を決める
-					// [rt]を左シフトしてrsに入れる
-					aluCodePath = `ALU_CODE_SLL;
-					aluInA = rtData; // [rt]
-					aluInB = constant; // alu内でGET_SHIFTによってshiftに変換させられる
-
-					regFileWrData = aluOut;
-					regFileWrNum = rs;
-					regFileWrEnable = `TRUE;
-				end
-				else if ( funct == `FUNCT_CODE_SRL ) begin
-					// [rt]を右シフトしてrsに入れる
-					aluCodePath = `ALU_CODE_SRL;
-					aluInA = rtData; // [rt]
-					aluInB = constant; // alu内でGET_SHIFTによってshiftに変換させられる
-
-					regFileWrData = aluOut;
-					regFileWrNum = rs;
-					regFileWrEnable = `TRUE;
-				end
-				else if ( funct == `FUNCT_CODE_ADD ) begin
-					// [rs] + [rt]をrdに入れる
-					aluCodePath = `ALU_CODE_ADD;
-					aluInA = rsData; // [rs]
-					aluInB = rtData; // [rt]
-
-					regFileWrData = aluOut;
-					regFileWrNum = rd;
-					regFileWrEnable = `TRUE;
-				end
-				else if ( funct == `FUNCT_CODE_SUB ) begin
-					// [rs] - [rt]をrdに入れる
-					aluCodePath = `ALU_CODE_SUB;
-					aluInA = rsData; // [rs]
-					aluInB = rtData; // [rt]
-
-					regFileWrData = aluOut;
-					regFileWrNum = rd;
-					regFileWrEnable = `TRUE;
-				end
-				else if ( funct == `FUNCT_CODE_AND ) begin
-					// [rs] & [rt]をrdに入れる
-					aluCodePath = `ALU_CODE_AND;
-					aluInA = rsData; // [rs]
-					aluInB = rtData; // [rt]
-
-					regFileWrData = aluOut;
-					regFileWrNum = rd;
-					regFileWrEnable = `TRUE;
-				end
-
-				else if ( funct == `FUNCT_CODE_OR ) begin
-					// [rs] | [rt]をrdに入れる
-					aluCodePath = `ALU_CODE_OR;
-					aluInA = rsData; // [rs]
-					aluInB = rtData; // [rt]
-
-					regFileWrData = aluOut;
-					regFileWrNum = rd;
-					regFileWrEnable = `TRUE;
-				end
-				else if ( funct == `FUNCT_CODE_SLT ) begin
-					// ([rs] < [rt])をrdに入れる
-					aluCodePath = `ALU_CODE_SLT;
-					aluInA = rsData; // [rs]
-					aluInB = rtData; // [rt]
-
-					regFileWrData = aluOut;
-					regFileWrNum = rd;
-					regFileWrEnable = `TRUE;
-				end
-			end
-
-			`OP_CODE_LD: begin // load word
-				pcWrEnable = `FALSE; // load wordなのでpcの外部書き込みなし
-				tmp = rtData + `EXPAND_CONSTANT( constant );
-
-				dataAddr = `EXPAND_ADDRESS( tmp ); // [rt]+constant
-				dataWrEnable = `FALSE; // データメモリからの読み出しなので書き込み不可
-
-				// rs にデータメモリからの読み出しを入れる
-				regFileWrData = dataIn;
-				regFileWrEnable = `TRUE;
-				regFileWrNum = rs;
-			end
-
-			`OP_CODE_ST: begin // store word
-				pcWrEnable = `FALSE; // store wordなのでpcの外部書き込みなし
-				tmp = rtData + `EXPAND_ADDRESS( constant );
-				dataAddr = `EXPAND_ADDRESS( tmp );
-				dataWrEnable = `TRUE; // データメモリへ読み込むので書き込み許可
-
-				dataOut = rsData; // [rs]をデータメモリに書き込む
-			end
-
-			`OP_CODE_ADDI: begin // [rt] + constantをrsに入れる
-				pcWrEnable = `FALSE; // addiなのでpcの外部書き込みなし
-
-				regFileWrData = rtData + `EXPAND_CONSTANT( constant );
-				regFileWrNum = rs;
-				regFileWrEnable = `TRUE;
-			end
-
-			`OP_CODE_ANDI: begin // [rt] & constantをrsに入れる
-				pcWrEnable = `FALSE; // andiなのでpcの外部書き込みなし
-
-				regFileWrData = rtData & `EXPAND_CONSTANT( constant );
-				regFileWrNum = rs;
-				regFileWrEnable = `TRUE;
-			end
-
-			`OP_CODE_ORI: begin // [rt] | constantをrsに入れる
-				pcWrEnable = `FALSE; // oriなのでpcの外部書き込みなし
-
-				regFileWrData = rtData | `EXPAND_CONSTANT( constant );
-				regFileWrNum = rs;
-				regFileWrEnable = `TRUE;
-			end
-
-			`OP_CODE_BEQ: begin // [rs] == [rt]でjmp
-				if (rsData == rtData) begin
-					addrIn = insnAddr + `INSN_PC_INC + `EXPAND_BR_DISPLACEMENT( constant );
-					pcWrEnable = `TRUE;
-				end
-				else begin
-					pcWrEnable = `FALSE;
-				end
-			end
-
-			`OP_CODE_BNE: begin
-				if (rsData != rtData) begin // [rs] != [rt]でjmp
-					addrIn = insnAddr + `INSN_PC_INC + `EXPAND_BR_DISPLACEMENT( constant );
-					pcWrEnable = `TRUE;
-				end
-				else begin
-					pcWrEnable = `FALSE;
-				end
-			end
-		endcase
 	end
 
 endmodule
