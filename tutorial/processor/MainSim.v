@@ -5,7 +5,7 @@
 
 
 // 基本的な型を定義したファイルの読み込み
-`include "Types.v" 
+`include "Types.v"
 
 
 
@@ -38,25 +38,26 @@ module H3_MainSim;
 	`DD_OutArray led;
 	`DD_GateArray gate;
 	`LampPath lamp;	// Lamp?
-	
+
 
 	// Main モジュール
 	Main main(
-		sigCH,
-		sigCE,
-		sigCP,
+		.sigCH( sigCH ),
+		.sigCE( sigCE ),
+		.sigCP( sigCP ),
 
-		led,
-		gate,
-		lamp,	// Lamp?
-		clkX4,	// 4倍速クロック
-		rst, 	// リセット（0でリセット）
-		clkX4
+		.led( led ),
+		.gate( gate ),
+		.lamp( lamp ),	// Lamp?]
+
+		.clkBase( clkX4 ),	// 4倍速クロック
+		.rst( rst ), 	// リセット（0でリセット）
+		.clkled( clkX4 ) // とりあえず
 	);
 
 	// 検証動作を記述する
 	initial begin
-		
+
 		//
 		// 初期化
 		//
@@ -64,7 +65,7 @@ module H3_MainSim;
 		sigCH = 1'b0;
 		sigCP = 1'b0;
 
-		
+
 		//
 		// リセット
 		//
@@ -75,7 +76,7 @@ module H3_MainSim;
 		#(CYCLE_TIME/8)
 		#(CYCLE_TIME)
 		#(CYCLE_TIME)
-		
+
 		// CH On
 		sigCH = 1'b1;
 
@@ -83,24 +84,24 @@ module H3_MainSim;
 		// シミュレーション開始
 		//
 
-		// 100 サイクル 
-		#(CYCLE_TIME*100)
+		// 100 サイクル
+		#(CYCLE_TIME*1000000)
 		$finish;
-     
+
 	end
 
 	// クロック
-	initial begin 
+	initial begin
 		countCycle = 0;
 		clkX4   = 1'b1;
 		cycleX4 = 0;
 		cycle = 0;
-		
+
 	    forever #(CYCLE_TIME / 2 / 4) begin
-	
+
 			// 4倍速
 	    	clkX4 = !clkX4 ;
-	    	
+
 	    	if( countCycle ) begin
 
 				cycleX4 = cycleX4 + 1;
@@ -110,8 +111,8 @@ module H3_MainSim;
 			    end
 
 			end
-			
-		    
+
+
 		    // カウント開始
 		    if( rst && clkX4 ) begin
 		    	countCycle = 1;

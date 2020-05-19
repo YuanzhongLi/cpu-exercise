@@ -14,7 +14,7 @@
 
 module	DynamicDisplay(
 	output	`DD_OutPath		ddOut,
-	output	`DD_GatePath	ddGate,	
+	output	`DD_GatePath	ddGate,
 	input	`DD_InPath		ddIn,
 	input	logic			clk,
 	input	logic			rst
@@ -63,7 +63,7 @@ logic	ctrlSig;
 		end
 		else if( ctrlSig == `TRUE )begin
 			case( gate )
-			default:     gate <= `GATE_LED_1;	
+			default:     gate <= `GATE_LED_1;
 			`GATE_LED_1: gate <= `GATE_LED_2;
 			`GATE_LED_2: gate <= `GATE_LED_3;
 			`GATE_LED_3: gate <= `GATE_LED_0;
@@ -99,22 +99,22 @@ module DD_Driver(
 	input	logic	clk,
 	input	logic	rst
 );
-	
-	generate 
-	
+
+	generate
+
 		genvar i;
 
 		for( i = 0; i < 2; i = i + 1 ) begin	: DD
 			DynamicDisplay
-				DD_Driver( 
-					`DD_OutArrayAt(  dstArray,  i ), 
+				DD_Driver(
+					`DD_OutArrayAt(  dstArray,  i ),
 					`DD_GateArrayAt( gateArray, i ),
 					`DD_InArrayAt(   srcArray,  i ),
 					clk,
 					rst
 				);
 	 	end
-	 	
+
 	endgenerate
 
 endmodule
@@ -126,14 +126,14 @@ module IOCtrl(
 	input logic clk,
 	input logic clkLed,
 	input logic rst,
-	
+
 	output logic dmemWrEnable,	// データメモリ書き込み
 	output `DataPath dataToCPU,	// CPU へのデータ
-	
+
 	output `DD_OutArray		led,	// 7seg
 	output `DD_GateArray	gate,	// 7seg gate
 	output `LampPath 	lamp,	// Lamp?
-	
+
 
 	input `DataAddrPath addrFromCPU,	// データアドレス
 	input `DataPath     dataFromCPU,	// データ本体
@@ -143,8 +143,6 @@ module IOCtrl(
 	input logic sigCH,
 	input logic sigCE,
 	input logic sigCP
-
-
 );
 	// Controll registers
 	struct packed {
@@ -152,39 +150,39 @@ module IOCtrl(
 		// A signal that indicates end of sort
 		// (W)
 		logic sortFinish;
-		
+
 		//  The count of sorted elements.
 		// (W)
 		`DataPath sortCount;
-		
+
 		// Lamp?
 		// (W)
 		`LampPath lamp;
-		
+
 		// A switch of input signals of the LED driver.
 		// (W)
 		logic     ledCtrl;
-		
+
 		// Input signals of the LED driver.
 		// (W)
 		`LED_InArray led;
-		
+
 		// Cycle count
 		logic		enableCycleCount;	// (W)
 		`CyclePath  cycleCount;			// (N/A)
-		
+
 		// Indicates start of sort.
-		// This register is set when the 'ch' is asserted and 
+		// This register is set when the 'ch' is asserted and
 		// is not changed after being set.
 		logic sortStart;
-		
+
 		// Externnal switches
 		// (R)
 		logic ce;
 		logic ch;
 		logic cp;
-		
-		
+
+
 	} ctrlReg, ctrlNext, ctrlInit;
 
 	// Output buffer
@@ -192,14 +190,14 @@ module IOCtrl(
 		`LED_OutArray led;
 		`LampPath lamp;
 	} outReg, outNext;
-	
+
 	// Indicates whether an address is IO or not.
 	logic isIO_Next;
-	
+
 	// Write enable for IO
 	logic weIO_Next;
-	
-	
+
+
 	// LED Driver
 	`LED_InArray  ledDrvIn;		// 4-bitx8 input
 	`LED_OutArray ledDrvOut;	// 7-bitx8 output
@@ -209,18 +207,18 @@ module IOCtrl(
 	`DD_OutArray	ddDrvOut;
 	`DD_GateArray		ddDrvGate;
 	DD_Driver ddDrv0( ddDrvOut, ddDrvGate, outReg.led, clkLed, rst );
-	
+
 	// IO Address/WriteEnable/Enable latch
 	`DataAddrPath addrIO_Reg;
 	`DataPath	  dataIO_Reg;
 	logic         weIO_Reg;
 	logic         isIO_Reg;
-	
+
 	//
 	// Controll ロジック
 	//
 	always_comb begin
-	
+
 		//
 		// --- IO / Data memory mapping
 		// This mapping is decided by 'addrFromCPU', not 'addrReg', because
@@ -244,14 +242,14 @@ module IOCtrl(
 		//
 		// --- Control registers
 		//
-		
+
 		// 制御レジスタの次のサイクルの値
 		ctrlNext = ctrlReg;
-		
+
 		// 書き込み
 		if( isIO_Reg && weIO_Reg ) begin
 
-			case( `PICK_IO_ADDR( addrIO_Reg ) ) 
+			case( `PICK_IO_ADDR( addrIO_Reg ) )
 
 				`IO_ADDR_SORT_FINISH:	ctrlNext.sortFinish = dataIO_Reg[0];
 				`IO_ADDR_SORT_COUNT: 	ctrlNext.sortCount  = dataIO_Reg;
@@ -265,20 +263,20 @@ module IOCtrl(
 				`IO_ADDR_LED5: `LED_InArrayAt( ctrlNext.led, 5 ) = dataIO_Reg[ `LED_IN_WIDTH-1 : 0 ];
 				`IO_ADDR_LED6: `LED_InArrayAt( ctrlNext.led, 6 ) = dataIO_Reg[ `LED_IN_WIDTH-1 : 0 ];
 				`IO_ADDR_LED7: `LED_InArrayAt( ctrlNext.led, 7 ) = dataIO_Reg[ `LED_IN_WIDTH-1 : 0 ];
-				
+
 				default: 		 		ctrlNext.lamp       = dataIO_Reg[ `LAMP_WIDTH-1 : 0 ];
 
-			
-			endcase	// case( addrReg ) 
+
+			endcase	// case( addrReg )
 
 		end	// if( isIO_Reg && weIO_Reg ) begin
-					
-					
+
+
 		// 読み出し
 		if( isIO_Reg ) begin
 
 			// IO
-			case( `PICK_IO_ADDR( addrIO_Reg ) ) 
+			case( `PICK_IO_ADDR( addrIO_Reg ) )
 				`IO_ADDR_SORT_START: dataToCPU = ctrlReg.sortStart;
 				`IO_ADDR_CE: dataToCPU = ctrlReg.ce;
 				`IO_ADDR_CP: dataToCPU = ctrlReg.cp;
@@ -293,8 +291,8 @@ module IOCtrl(
 			dataToCPU = dataFromDMem;
 
 		end
-		
-		
+
+
 		// LED ドライバ
 		if( ctrlReg.ledCtrl == `LED_CTRL_USER ) begin
 			ledDrvIn = ctrlReg.led;
@@ -302,8 +300,8 @@ module IOCtrl(
 		else begin
 			ledDrvIn = ctrlReg.cycleCount;
 		end
-		
-		
+
+
 		// サイクルカウント
 		if( ( !ctrlReg.ch || ctrlReg.enableCycleCount ) &&
 		    !ctrlReg.sortFinish
@@ -312,19 +310,19 @@ module IOCtrl(
 			ctrlNext.enableCycleCount = `TRUE;
 			ctrlNext.sortStart = `TRUE;
 		end
-		
-		
+
+
 		// Switchs
 		// CH/CE/CP
 		ctrlNext.ch = sigCH;
 		ctrlNext.ce = sigCE;
 		ctrlNext.cp = sigCP;
 
-		
+
 		//
 		// --- 出力バッファ
 		//
-		
+
 		// LED & Lamp
 		outNext.lamp = ctrlReg.lamp;
 		outNext.led  = ledDrvOut;
@@ -335,7 +333,7 @@ module IOCtrl(
 		led  = ddDrvOut;
 		lamp = outReg.lamp;
 		gate = ddDrvGate;
-		
+
 		//
 		// リセット
 		//
@@ -344,7 +342,7 @@ module IOCtrl(
 		ctrlInit.cp = 1'b1;
 		ctrlInit.ce = 1'b1;
  	end
-	
+
 
 	//
 	// --- レジスタ

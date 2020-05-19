@@ -41,61 +41,64 @@ module Main(
 
 	// Clock divider
 	ClockDivider clockDivider(
-		clk,
-		rst,
-		clkX4
+		.clk( clk ),
+		.rst( rst ),
+		.clkX4( clkX4 )
 	);
 
 	// IO
 	IOCtrl ioCtrl(
-		clkX4,
-		clkled,
-		rst,
-		dmemWrEnable,
-		dataToCPU,
+		.clk( clkX4 ),
+		.clkLed( clkled ),
+		.rst( rst ),
+		.dmemWrEnable( dmemWrEnable ),
+		.dataToCPU( dataToCPU ),
 
-		led,	// LED
-		gate,	// select 7seg
-		lamp,	// Lamp?
+		.led( led ),	// LED
+		.gate( gate ),	// select 7seg
+		.lamp( lamp ),	// Lamp?
 
-		dataAddr,
-		dataFromCPU,
-		dataFromDMem,
-		dataWE_Req,
+		.addrFromCPU( dataAddr ),
+		.dataFromCPU( dataFromCPU ),
+		.dataFromDMem( dataFromDMem ),
+		.weFromCPU( dataWE_Req ),
 
-		sigCH,
-		sigCE,
-		sigCP
+		.sigCH( sigCH ),
+		.sigCE( sigCE ),
+		.sigCP( sigCP )
 	);
 
 	// CPU
 	CPU cpu(
-		clk,
-		rst,
-		imemAddr,		// 命令メモリへのアドレス出力
-		dataAddr,		// データメモリへのアドレス出力
-		dataFromCPU,	// データメモリへの入力
-		dataWE_FromCPU,	// データメモリ書き込み有効
-		imemDataToCPU,	// 命令メモリからの出力
-		dataToCPU		// データメモリからの出力
+		.clk( clk ),
+		.rst( rst ),
+
+		.insnAddr( imemAddr ),		// 命令メモリへのアドレス出力
+		.dataAddr( dataAddr ),		// データメモリへのアドレス出力
+		.dataOut( dataFromCPU ),	// データメモリへの入力
+		.dataWrEnable( dataWE_FromCPU ),	// データメモリ書き込み有効
+
+		.insn( imemDataToCPU ),	// 命令メモリからの出力
+		.dataIn( dataToCPU )	// データメモリからの出力
 	);
 
 	// IMem
 	IMem imem(
-		clkX4, 			// メモリは4倍速
-		rst,
-		imemDataToCPU,
-		imemAddr
+		.clk( clkX4 ), 			// メモリは4倍速
+		.rst( rst ),
+		.insn( imemDataToCPU ),
+		.addr( imemAddr )
 	);
 
 	// Data memory
 	DMem dmem(
-		clkX4,			// メモリは4倍速
-		rst,			// リセット
-		dataFromDMem, // out
-		dataAddr, // in
-		dataFromCPU, // in
-		dmemWrEnable // in
+		.clk( clkX4 ),			// メモリは4倍速
+		.rst( rst ),			// リセット
+
+		.dataOut( dataFromDMem ), // out
+		.addr( dataAddr ), // in
+		.dataIn( dataFromCPU ), // in
+		.wrEnable( dmemWrEnable ) // in
 	);
 
 	// Connections & multiplexers
@@ -108,6 +111,13 @@ module Main(
 		dataWE_Req = !clk && dataWE_FromCPU;
 
  	end
+
+	initial
+	$monitor(
+		$stime,
+		" insn(%h) ", 	// printf と同様の書式設定
+		imemDataToCPU
+	);
 
 
 endmodule
