@@ -6,7 +6,7 @@ void sort( int size )
 {
 	int i, j;
 	for( i = 0; i < size; i++ ){
-		for( j = size-1; j > i; j-- ) {
+		for( j = size-1; j >= 1; j-- ) {
 			if ( array[j] < array[j-1] ) {
 				int tmp = array[j];
 				array[j] = array[j-1];
