@@ -28,8 +28,10 @@ module BranchUnit(
 		endcase
 
 		disp = `EXPAND_BR_DISPLACEMENT( constant );
- 		pcOut =
- 			pcIn + `INSN_PC_INC + (brTaken ? disp : `INSN_ADDR_WIDTH'h0); // 相対addr
+ 		// pcOut =
+ 		// 	pcIn + `INSN_PC_INC + (brTaken ? disp : `INSN_ADDR_WIDTH'h0); // 相対addr
+		pcOut =
+ 			brTaken ? disp : pcIn + `INSN_PC_INC; // 絶対addr
 	end
 
 endmodule

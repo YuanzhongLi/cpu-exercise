@@ -24,8 +24,8 @@ module RegisterFile(
 	// 実際に値が入るストレージ
 	// `DataPath の配列（サイズ：`REG_FILE_SIZE）
 	`DataPath strage[ 0 : `REG_FILE_SIZE-1 ];
-
 	`DataPath r0;
+
 	`DataPath r1;
 	`DataPath r2;
 	`DataPath r3;
@@ -38,7 +38,6 @@ module RegisterFile(
 	// クロックの立ち上がりによって書き込みが行われる と言う動作を書くことで，
 	// コンパイラはこれを順序回路だと解釈する．
 	always_ff @( posedge clk ) begin
-		strage[0] <= 0;
 		if( wrEnable ) begin			// 書き込み制御
 			strage[ wrNum ] <= wrData;	// 順序回路では，ノンブロッキング代入で
 		end
@@ -52,14 +51,14 @@ module RegisterFile(
 		else begin
 			rdDataA = 0;
 		end
+
 		if ( rdNumB ) begin
 			rdDataB = strage[ rdNumB ];
 		end
 		else begin
 			rdDataB = 0;
 		end
-
-		r0 = strage[0];
+		r0 = 0;
 		r1 = strage[1];
 		r2 = strage[2];
 		r3 = strage[3];

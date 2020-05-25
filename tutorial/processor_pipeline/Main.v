@@ -110,19 +110,19 @@ module Main(
 		clkX4  = clkBase;
 
 		// データメモリへの書き込みはクロックサイクル後半のみ有効
-		dataWE_Req = !clk && dataWE_FromCPU;
+		// dataWE_Req = !clk && dataWE_FromCPU;
+		dataWE_Req = dataWE_FromCPU;
 
  	end
 
 	initial
 	$monitor(
 		$stime,
-		"\nimemAddr(%d)\n imemDataToCPU(%h)\n dataAddr(%d)\n dataFromDMem(%h)\n rst(%d)\n", 	// printf と同様の書式設定
+		"\nimemAddr(%d)\n imemDataToCPU(%h)\n dataAddr(%d)\n dataFromDMem(%h)\n", 	// printf と同様の書式設定
 		imemAddr,
 		imemDataToCPU,
 		dataAddr,
-		dataFromDMem,
-		rst
+		dataFromDMem
 	);
 
 
