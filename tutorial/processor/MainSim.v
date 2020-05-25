@@ -85,7 +85,7 @@ module H3_MainSim;
 		//
 
 		// 100 サイクル
-		#(CYCLE_TIME*1000000)
+		#(CYCLE_TIME*100)
 		$finish;
 
 	end
