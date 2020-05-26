@@ -122,7 +122,8 @@ module CPU(
 		.code( dcALUCode ) // in
 	);
 
-	always_comb begin
+	//　パイプラインレジスタ
+	always_ff @( posedge clk ) begin
 		// IMem
 		imemInsnCode = insn;
 		insnAddr     = pcOut;

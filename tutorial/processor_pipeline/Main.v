@@ -48,8 +48,8 @@ module Main(
 
 	// IO
 	IOCtrl ioCtrl(
-		.clk( clkX4 ), // in
-		.clkLed( clkled ), // in
+		.clk( clk ), // in
+		.clkLed( clk ), // in
 		.rst( rst ), // in
 
 		.dmemWrEnable( dmemWrEnable ), // out
@@ -85,7 +85,7 @@ module Main(
 
 	// IMem
 	IMem imem(
-		.clk( clkX4 ), 			// in: メモリは4倍速
+		.clk( clk ),
 		.rst( rst ), // in
 
 		.insn( imemDataToCPU ), // out
@@ -94,7 +94,7 @@ module Main(
 
 	// Data memory
 	DMem dmem(
-		.clk( clkX4 ),			// メモリは4倍速
+		.clk( clk ),
 		.rst( rst ),			// リセット
 
 		.dataOut( dataFromDMem ), // out
@@ -110,9 +110,17 @@ module Main(
 		clkX4  = clkBase;
 
 		// データメモリへの書き込みはクロックサイクル後半のみ有効
-		dataWE_Req = !clk && dataWE_FromCPU;
+		// dataWE_Req = !clk && dataWE_FromCPU;
+		dataWE_Req = clk && dataWE_FromCPU;
 
  	end
+
+	initial
+	$monitor(
+		$stime,
+		"\n imemDataToCPU(%h)",
+		imemDataToCPU
+	);
 
 endmodule
 
