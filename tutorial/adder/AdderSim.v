@@ -5,7 +5,7 @@
 
 
 // 基本的な型を定義したファイルの読み込み
-`include "Types.v" 
+`include "Types.v"
 
 
 
@@ -25,20 +25,20 @@ module H3_Simulator;
 
 	//
 	// Adder.v で定義された加算器 Adder の実体を adder と言う名前で定義．
-	// 
+	//
 	Adder adder(
 		.dst ( adderOut ), 	// Adder の dst  に adderOut を接続
 		.srcA( adderInA ), 	// Adder の srcA に adderInA を接続
-		.srcB( adderInB ) 	// Adder の srcB に adderInB を接続 
+		.srcB( adderInB ) 	// Adder の srcB に adderInB を接続
 	);
 
 	//
 	// 検証用の信号の入力を記述
-	// 
-	initial begin       
+	//
+	initial begin
 
 		//シミュレーション開始
-		
+
 		adderInA = 1;	// A に 1 代入
 		adderInB = 8;	// B に 8 代入
 
@@ -50,18 +50,18 @@ module H3_Simulator;
 		#20 			// 20ns 経過
 
 		$finish;		// シミュレーション終了
-		
+
 	end
 
 	//
 	// シミュレーション結果の表示
 	// inA, inB, Out に変化が生じた場合，$monitor が呼ばれて出力が表示される．
-	// 
-	initial 
+	//
+	initial
 		$monitor(
 			$stime, 					// 現在の時間
 			" a(%d) + b(%d) = c(%d)", 	// printf と同様の書式設定
-			adderInA, 
+			adderInA,
 			adderInB,
 			adderOut
 		);

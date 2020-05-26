@@ -114,18 +114,6 @@ module Main(
 
  	end
 
-	initial
-	$monitor(
-		$stime,
-		"\nimemAddr(%d)\n imemDataToCPU(%h)\n dataAddr(%d)\n dataFromDMem(%h)\n rst(%d)\n", 	// printf と同様の書式設定
-		imemAddr,
-		imemDataToCPU,
-		dataAddr,
-		dataFromDMem,
-		rst
-	);
-
-
 endmodule
 
 

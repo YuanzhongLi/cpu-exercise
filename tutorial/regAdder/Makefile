@@ -62,6 +62,6 @@ sim:
 
 # GUI simulation
 sim-gui:
-	( cd $(PROJECT_WORK); $(VSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) -do "do wave.do; run 30ns"; )
+	( cd $(PROJECT_WORK); $(VSIM) $(LIBRARY_NAME).$(TOPLEVEL_MODULE) -do "do wave.do; run 50ns"; )
 
 #	( cd $(WORK); $(VLOG) $(OPTIONS) $(DEPS); )
