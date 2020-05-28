@@ -13,13 +13,6 @@ module Main(
 	input logic rst, 		// リセット（0でリセット）
 	input logic clkled   // LED用クロック
 );
-	// 命令メモリとデータメモリは，FPGA の仕様により
-	// アドレスを入力した1サイクル後にデータが読み出される．
-	// このままではシングルサイクルマシンが作れないので，メモリには
-	// 4倍速のクロックを入れてある．
-
-	// Clock/Reset
-	logic clkX4;
 	logic clk;
 
 	// IMem
@@ -38,13 +31,6 @@ module Main(
 	`DataPath     dataFromCPU;		// 入力
 	`DataPath     dataFromDMem;		// データメモリ読み出し
 	logic         dataWE_FromCPU;
-
-	// Clock divider
-	ClockDivider clockDivider(
-		.clk( clk ),
-		.rst( rst ),
-		.clkX4( clkX4 )
-	);
 
 	// IO
 	IOCtrl ioCtrl(
@@ -107,10 +93,7 @@ module Main(
 	always_comb begin
 
 		// クロック
-		clkX4  = clkBase;
-
-		// データメモリへの書き込みはクロックサイクル後半のみ有効
-		// dataWE_Req = !clk && dataWE_FromCPU;
+		clk  = clkBase;
 		dataWE_Req = clk && dataWE_FromCPU;
 
  	end

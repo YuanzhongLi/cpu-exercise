@@ -16,7 +16,6 @@ TOPLEVEL_MODULE = H3_MainSim
 SOURCES = \
 	ALU.v \
 	Branch.v \
-	ClockDivider.v \
 	CPU.v \
 	Decoder.v \
 	DMem.v \
@@ -27,6 +26,10 @@ SOURCES = \
 	MainSim.v \
 	PC.v \
 	RegFile.v \
+	Stage1.v \
+	Stage2.v \
+	Stage3.v \
+	Stage4.v \
 	Types.v \
 
 DEPS = \

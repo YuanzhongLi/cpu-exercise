@@ -16,8 +16,9 @@ module ThirdStage(
 	input `ConstantPath inConstat,
 	input `RegNumPath inWrRg,	// 書き込みレジスタ番号
 	input logic inPcWrEnable,
+
 	output `DataPath wrData,	// データメモリに書き込む内容
-	output `DataPath outAluOut,		
+	output `DataPath outAluOut,
 	output `BrCodePath outBrCode,
 	output logic outIsLoadInsn,		// ロード命令かどうか
 	output logic outIsStoreInsn,		// ストア命令かどうか
@@ -25,8 +26,10 @@ module ThirdStage(
 	output `ConstantPath outConstat,
 	output `RegNumPath outWrRg,
 	output logic outPcWrEnable,
+
 	input logic flush,
 	input `DataPath inWrData,
+
 	output `DataPath outWrData
 );
 
@@ -68,5 +71,5 @@ module ThirdStage(
 			outWrData <= inWrData;
 		end
 	end
-	
+
 endmodule

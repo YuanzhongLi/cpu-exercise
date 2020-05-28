@@ -4,7 +4,7 @@ module CPU(
 
 	input logic clk,	// クロック
 	input logic rst,	// リセット
-	
+
 	output `InsnAddrPath insnAddr,		// 命令メモリへのアドレス出力
 	output `DataAddrPath dataAddr,		// データバスへのアドレス出力
 	output `DataPath     dataOut,		// 書き込みデータ出力
@@ -17,15 +17,15 @@ module CPU(
 	output logic flush,
 	output logic stall
 );
-	
+
 	// PC
 	`InsnAddrPath pcOut;		// アドレス出力
 	`InsnAddrPath pcIn;			// 外部書き込みをする時のアドレス
 	logic pcWrEnable;			// 外部書き込み有効
-	
+
 	// IMem
 	`InsnPath imemInsnCode;		// 命令コード
-	
+
 	// Decoder
 	`OpPath dcOp;				// OP フィールド
 	`RegNumPath dcRS;			// RS フィールド
@@ -33,7 +33,7 @@ module CPU(
 	`RegNumPath dcRD;			// RD フィールド
 	`ShamtPath dcShamt;			// SHAMT フィールド
 	`FunctPath dcFunct;			// FUNCT フィールド
-	`ConstantPath dcConstat;	// CONSTANT フィールド
+	`ConstantPath dcconstant;	// CONSTANT フィールド
 
 	// Controll
 	`ALUCodePath dcALUCode;		// ALU の制御コード
@@ -50,12 +50,12 @@ module CPU(
 	`DataPath   rfWrData;		// 書き込みデータ
 	`RegNumPath rfWrNum;		// 書き込み番号
 	logic       rfWrEnable;		// 書き込み制御 1の場合，書き込みを行う
-	
+
 	// ALU
 	`DataPath aluOut;			// ALU 出力
 	`DataPath aluInA;			// ALU 入力A
 	`DataPath aluInB;			// ALU 入力B
-	
+
 	// Forwarding
 	`ForwardCodePath aluInASelectFromID;
 	`ForwardCodePath aluInBSelectFromID;
@@ -64,24 +64,24 @@ module CPU(
 	`DataPath dataFromWB;
 
 	// Pipeline
-	
+
 	// IFstage
-	`InsnPath insnToDecorder;
-	
-	
+	`InsnPath insnToDecoder;
+
+
 	// IDstage
-	
+
 	// EXstage
 	`DataPath rdDataAToEX;
 	`DataPath rdDataBToEX;
 	`DataPath aluInAFromID;			// ALU 入力A
 	`DataPath aluInBFromID;			// ALU 入力B
 	`OpPath opToEX;
-	
+
 	`ShamtPath shamtToEX;			// SHAMT フィールド
 	`FunctPath functToEX;			// FUNCT フィールド
-	`ConstantPath constatToEX;	// CONSTANT フィールド
-	
+	`ConstantPath constantToEX;	// CONSTANT フィールド
+
 	`ALUCodePath aluCodeToEX;		// ALU の制御コード
 	`BrCodePath brCodeToEX;		// ブランチの制御コード
 	logic isSrcA_RtToEX;			// ソースの1個目が Rt かどうか
@@ -92,12 +92,12 @@ module CPU(
 	logic wrEnableToEX;
 	`RegNumPath wrNumToEX;
 	//`DataAddrPath dataAddrOnEX;
-	
-	
+
+
 	// MEMstage
 	`DataPath aluOutToMEM;
 	`BrCodePath brCodeToMEM;
-	`ConstantPath constatToMEM;
+	`ConstantPath constantToMEM;
 	`DataPath dataToDMem;
 	logic isLoadInsnToMEM;			// ロード命令かどうか
 	logic isStoreInsnToMEM;		// ストア命令かどうか
@@ -106,22 +106,21 @@ module CPU(
 	logic pcWrEnableToMEM;
 	`DataPath dataFromDMem;
 	logic pcWrEnableToIF;
-	
-	
+
 	// WBstage
 	`DataPath wrDataToWB;
 	`RegNumPath wrNumToWB;
 	`DataPath aluOutToWB;
 	logic wrEnableToWB;
 	logic isLoadInsnToWB;
-	
-	
-	
+
 	// PC
 	PC pc(
 		.clk (clk),
 		.rst (rst),
+
 		.addrOut (pcOut),
+
 		.addrIn (pcIn),
 		.wrEnable (pcWrEnableToIF),
 		.stall (stall)
@@ -132,11 +131,11 @@ module CPU(
 		.pcOut (pcIn),	// BranchUnit への入力は in と out が逆になるのを注意
 		.brCode (brCodeToMEM),
 		.aluOut (aluOutToMEM),
-		.constant (constatToMEM),
+		.constant (constantToMEM),
 		.inPcWrEnable (pcWrEnableToMEM),
 		.outPcWrEnable (pcWrEnableToIF)
 	);
-	
+
 
 	// Decoder
 	Decoder decoder(
@@ -146,7 +145,7 @@ module CPU(
 		.rd (dcRD),
 		.shamt (dcShamt),
 		.funct (dcFunct),
-		.constat (dcConstat),	
+		.constant (dcconstant),
 		.aluCode (dcALUCode),
 		.brCode (dcBrCode),
 		.pcWrEnable (pcWrEnable),			// PC 書き込みを行うかどうか
@@ -156,21 +155,24 @@ module CPU(
 		.isDstRt (dcIsDstRt),			// ディスティネーションがRtかどうか
 		.rfWrEnable (rfWrEnable),			// ディスティネーション書き込みを行うかどうか
 		.isALUInConstant (dcIsALUInConstant),	// ALU の入力が Constant かどうか
-		.insn (insnToDecorder)
+		.insn (insnToDecoder)
 	);
-	
+
 	// RegisterFile
 	RegisterFile regFile(
 		.clk (clk),
+
 		.rdDataA (rfRdDataS),
 		.rdDataB (rfRdDataT),
+
 		.rdNumA (dcRS),
 		.rdNumB (dcRT),
+
 		.wrData (rfWrData),
 		.wrNum (wrNumToWB),
 		.wrEnable (wrEnableToWB)
 	);
-	
+
 	// ALU
 	ALU alu(
 		.aluOut (aluOut),
@@ -178,24 +180,24 @@ module CPU(
 		.aluInB (aluInB),
 		.code (aluCodeToEX)
 	);
-	
+
 	FirstStage firstStage(
-		.clk (clk),
-		.rst (rst),
-		.insnFromIMem (imemInsnCode),
-		.insnToDecorder (insnToDecorder),
+		.clk (clk), // in
+		.rst (rst), // in
+		.insnFromIMem (imemInsnCode), //
+		.insnToDecoder (insnToDecoder), //
 		.stall (stall),
 		.flush (flush)
 	);
-	
+
 	SecondStage secondStage(
-		.clk (clk),
-		.rst (rst),
+		.clk (clk), // in
+		.rst (rst), // in
 		.inRdDataA (rfRdDataS),
 		.inRdDataB (rfRdDataT),
 		.inWrNum (rfWrNum),
 		.inWrEnable (rfWrEnable),
-		.inConstat (dcConstat),
+		.inconstant (dcconstant),
 		.inOp (dcOp),
 		.inShamt (dcShamt),
 		.inFunct (dcFunct),
@@ -206,11 +208,12 @@ module CPU(
 		.inIsALUInConstant (dcIsALUInConstant),
 		.inIsSrcA_Rt (dcIsSrcA_Rt),
 		.inPcWrEnable (pcWrEnable),
+
 		.outRdDataA (rdDataAToEX),
 		.outRdDataB (rdDataBToEX),
 		.outWrNum (wrNumToEX),
 		.outWrEnable (wrEnableToEX),
-		.outConstat (constatToEX),
+		.outConstant (constantToEX),
 		.outOp (opToEX),
 		.outShamt (shamtToEX),
 		.outFunct (functToEX),
@@ -228,7 +231,7 @@ module CPU(
 		.flush (flush),
 		.stall (stall)
 	);
-	
+
 	ThirdStage thirdStage(
 		.clk (clk),
 		.rst (rst),
@@ -238,37 +241,41 @@ module CPU(
 		.inIsLoadInsn (isLoadInsnToEX),
 		.inIsStoreInsn (isStoreInsnToEX),
 		.inRgWrEnable (wrEnableToEX),
-		.inConstat (constatToEX),
+		.inconstant (constantToEX),
 		.inWrRg (wrNumToEX),
 		.inPcWrEnable (pcWrEnableToEX),
+
 		.wrData (dataToDMem),
 		.outAluOut (aluOutToMEM),
 		.outBrCode (brCodeToMEM),
 		.outIsLoadInsn (isLoadInsnToMEM),
 		.outIsStoreInsn (isStoreInsnToMEM),
 		.outRgWrEnable (wrEnableToMEM),
-		.outConstat (constatToMEM),
+		.outconstant (constantToMEM),
 		.outWrRg (wrNumToMEM),
 		.outPcWrEnable (pcWrEnableToMEM),
 		.flush (flush),
 		.inWrData (rfWrData),
 		.outWrData (dataFromWB)
 	);
+
 	FourthStage fourthStage(
 		.clk (clk),
 		.rst (rst),
+
 		.dataFromDMem (dataFromDMem),
 		.inWrNum (wrNumToMEM),
 		.inIsLoadInsn (isLoadInsnToMEM),
 		.wrEnable (wrEnableToMEM),
 		.aluOut (aluOutToMEM),
+
 		.outData (wrDataToWB),
 		.outWrNum (wrNumToWB),
 		.regWrite (wrEnableToWB),
 		.memToReg (isLoadInsnToWB),
 		.dataFromEX (aluOutToWB)
 	);
-	
+
 	Forwarding forwarding(
 		.rsNumFromID (dcRS),
 		.rtNumFromID (dcRT),
@@ -280,62 +287,61 @@ module CPU(
 		.rgWrEnableFromWB (wrEnableToWB),
 		.aluInASelect (aluInASelectFromID),
 		.aluInBSelect (aluInBSelectFromID)
-	
 	);
-	
+
 	// Connections & multiplexers
 	always_comb begin
-		
+
 		// IMem
 		imemInsnCode = insn;
-		
-		insnAddr     = pcOut;
-		
 
-		
+		insnAddr     = pcOut;
+
+
+
 		// Register write data
 		rfWrData = isLoadInsnToWB ? wrDataToWB : aluOutToWB;
-		
+
 		// Register write num
 		rfWrNum = dcIsDstRt ? dcRT : dcRD;
 
 		// ALU
-		
+
 		case( aluInASelectToEX )
 				default:			aluInAFromID = rdDataAToEX;
 				`FORWARD_CODE_EX:	aluInAFromID = aluOutToMEM;
 				`FORWARD_CODE_MEM:	aluInAFromID = rfWrData;
 				`FORWARD_CODE_WB:	aluInAFromID = dataFromWB;
 		endcase
-		
+
 		case( aluInBSelectToEX )
 				default:			aluInBFromID = rdDataBToEX;
 				`FORWARD_CODE_EX:	aluInBFromID = aluOutToMEM;
 				`FORWARD_CODE_MEM:	aluInBFromID = rfWrData;
 				`FORWARD_CODE_WB:	aluInBFromID = dataFromWB;
 		endcase
-		
+
 		if (opToEX == `OP_CODE_ALU && functToEX == `FUNCT_CODE_SRL || opToEX == `OP_CODE_ALU && functToEX == `FUNCT_CODE_SLL) begin
 			aluInA = aluInAFromID;
 			aluInB = shamtToEX;
 		end
 		else begin
 			aluInA = isSrcA_RtToEX ? aluInBFromID : aluInAFromID;
-			aluInB = isALUInConstantToEX ? constatToEX : aluInBFromID;
+			aluInB = isALUInConstantToEX ? constantToEX : aluInBFromID;
 		end
-		
+
 		// Data memory
 		dataOut  = aluInBFromID;
 		dataFromDMem = dataIn;
-		//dataAddrOnEX = rdDataAToEX[ `DATA_ADDR_WIDTH - 1 : 0 ] + `EXPAND_ADDRESS( constatToEX );
-		dataAddr = constatToEX + aluInA;
-		
+		//dataAddrOnEX = rdDataAToEX[ `DATA_ADDR_WIDTH - 1 : 0 ] + `EXPAND_ADDRESS( constantToEX );
+		dataAddr = constantToEX + aluInA;
+
 		// DMem write enable
 		dataWrEnable = isStoreInsnToEX;
-		
+
 		// Flush
 		flush = pcWrEnableToIF;
-		
+
 		// Stall
 		if ( opToEX == `OP_CODE_LD && dcRS == wrNumToEX || opToEX == `OP_CODE_LD && dcRT == wrNumToEX ) begin
 			stall = `TRUE;
@@ -343,8 +349,8 @@ module CPU(
 		else begin
 			stall = `FALSE;
 		end
-			
-		
+
+
  	end
 
 endmodule

@@ -24,11 +24,10 @@ module H3_MainSim;
 	integer i;
 
 	integer cycle;		// サイクル
-	integer cycleX4;	// 4倍速サイクル
 
 	logic countCycle;
 
-	logic clkX4;		// 4倍速クロック
+	logic clk;
 	logic rst;
 
 	logic sigCH;
@@ -50,9 +49,9 @@ module H3_MainSim;
 		.gate( gate ),
 		.lamp( lamp ),	// Lamp?]
 
-		.clkBase( clkX4 ),	// 4倍速クロック
+		.clkBase( clk ),
 		.rst( rst ), 	// リセット（0でリセット）
-		.clkled( clkX4 ) // とりあえず
+		.clkled( clk )
 	);
 
 	// 検証動作を記述する
@@ -93,28 +92,20 @@ module H3_MainSim;
 	// クロック
 	initial begin
 		countCycle = 0;
-		clkX4   = 1'b1;
-		cycleX4 = 0;
+		clk   = 1'b1;
 		cycle = 0;
 
 	    forever #(CYCLE_TIME / 2 / 4) begin
-
-			// 4倍速
-	    	clkX4 = !clkX4 ;
+	    	clk = !clk ;
 
 	    	if( countCycle ) begin
 
-				cycleX4 = cycleX4 + 1;
-				// 等速
-				if( cycleX4 % 8 == 0 ) begin
-			    	cycle = cycle + 1 ;
-			    end
-
+				cycle = cycle + 1;
 			end
 
 
 		    // カウント開始
-		    if( rst && clkX4 ) begin
+		    if( rst && clk ) begin
 		    	countCycle = 1;
 		    end
 	    end
