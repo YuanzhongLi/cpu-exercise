@@ -12,7 +12,9 @@ module BranchUnit(
 	input `BrCodePath	brCode,
 	input `DataPath     regRS,
 	input `DataPath     regRT,
-	input `ConstantPath constant
+	input `ConstantPath constant,
+
+	output  logic outPcWrEnable
 );
 
 	logic brTaken;
@@ -29,7 +31,9 @@ module BranchUnit(
 
 		disp = `EXPAND_BR_DISPLACEMENT( constant );
  		pcOut =
- 			pcIn + `INSN_PC_INC + (brTaken ? disp : `INSN_ADDR_WIDTH'h0); // 相対addr
+ 			pcIn + `INSN_PC_INC + (brTaken ? - 4*`INSN_PC_INC + disp : `INSN_ADDR_WIDTH'h0); // 相対addr
+
+		outPcWrEnable = brTaken;
 	end
 
 endmodule

@@ -15,7 +15,7 @@ module ThirdStage(
 	input logic inIsLoadInsn,		// ロード命令かどうか
 	input logic inIsStoreInsn,		// ストア命令かどうか
 	input logic inRgWrEnable,
-	input `ConstantPath inConstat,
+	input `ConstantPath inConstant,
 	input `RegNumPath inWrRg,	// 書き込みレジスタ番号
 	input logic inPcWrEnable,
 
@@ -27,7 +27,7 @@ module ThirdStage(
 	output logic outIsLoadInsn,		// ロード命令かどうか
 	output logic outIsStoreInsn,		// ストア命令かどうか
 	output logic outRgWrEnable,
-	output `ConstantPath outConstat,
+	output `ConstantPath outConstant,
 	output `RegNumPath outWrRg,
 	output logic outPcWrEnable,
 
@@ -47,7 +47,7 @@ module ThirdStage(
 			outRgWrEnable <= `FALSE;
 			outWrRg <= `FALSE;
 			outBrCode <= `FALSE;
-			outConstat <= `FALSE;
+			outConstant <= `FALSE;
 			outPcWrEnable <= `FALSE;
 			outWrData <= `FALSE;
 		end
@@ -61,7 +61,7 @@ module ThirdStage(
 			outRgWrEnable <= inRgWrEnable;
 			outWrRg <= inWrRg;
 			outBrCode <= inBrCode;
-			outConstat <= inConstat;
+			outConstant <= inConstant;
 			outPcWrEnable <= inPcWrEnable;
 			outWrData <= inWrData;
 		end

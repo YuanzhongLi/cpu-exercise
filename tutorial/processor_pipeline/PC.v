@@ -35,5 +35,12 @@ module PC(
 	// 出力
 	assign addrOut = pc;
 
+	// initial
+	// $monitor(
+	// 	$stime,
+	// 	"\nwrEnable(%d) \npc(%h)\n",
+	// 	wrEnable,
+	// 	pc
+	// );
 
 endmodule

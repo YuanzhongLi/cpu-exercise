@@ -22,9 +22,9 @@
 `define SHAMT_POS   6	// 開始位置
 `define ShamtPath logic[ `SHAMT_WIDTH-1 : 0 ]
 
-`define CONSTAT_WIDTH 16	// 幅
-`define CONSTAT_POS   0		// 開始位置
-`define ConstantPath logic[ `CONSTAT_WIDTH-1 : 0 ]
+`define CONSTANT_WIDTH 16	// 幅
+`define CONSTANT_POS   0		// 開始位置
+`define ConstantPath logic[ `CONSTANT_WIDTH-1 : 0 ]
 
 `define RS_POS 21
 `define RT_POS 16
@@ -36,12 +36,12 @@
 
 // constant を DataPath の幅にまで符号拡張する
 // DataPath が小さいので，ただ取り出すだけでよい
-`define EXPAND_CONSTANT( disp ) disp[ `CONSTAT_WIDTH - 1 : 0 ]
+`define EXPAND_CONSTANT( disp ) disp[ `CONSTANT_WIDTH - 1 : 0 ]
 
 // 本来はこうなる
 //\
 //{ \
-//	(disp[ `CONSTAT_WIDTH - 1 ] ? 16'hffff : 16'b0000),	// [31:16] \
+//	(disp[ `CONSTANT_WIDTH - 1 ] ? 16'hffff : 16'b0000),	// [31:16] \
 //	disp												// [15: 0] \
 //}\
 
@@ -57,7 +57,7 @@
 // 本来はこうなる
 // `define BR_DISPLACEMENT(disp) \
 // { \
-// 	(disp[ `CONSTAT_WIDTH - 1 ] ? 12'b111111111111 : 12'b000000000000),	// [31:19] \
+// 	(disp[ `CONSTANT_WIDTH - 1 ] ? 12'b111111111111 : 12'b000000000000),	// [31:19] \
 // 	disp,																// [18: 2] \
 // 	2'b00																// [ 1: 0] \
 // }\

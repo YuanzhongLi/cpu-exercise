@@ -47,7 +47,7 @@ module H3_MainSim;
 
 		.led( led ),
 		.gate( gate ),
-		.lamp( lamp ),	// Lamp?]
+		.lamp( lamp ),	// Lamp?
 
 		.clkBase( clk ),
 		.rst( rst ), 	// リセット（0でリセット）
@@ -84,7 +84,7 @@ module H3_MainSim;
 		//
 
 		// 100 サイクル
-		#(CYCLE_TIME*1000)
+		#(CYCLE_TIME*100000)
 		$finish;
 
 	end
@@ -99,9 +99,8 @@ module H3_MainSim;
 	    	clk = !clk ;
 
 	    	if( countCycle ) begin
-
-				cycle = cycle + 1;
-			end
+					cycle = cycle + 1;
+				end
 
 
 		    // カウント開始

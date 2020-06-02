@@ -14,7 +14,7 @@ module Decoder(
 	output `RegNumPath rd,
 	output `ShamtPath  shamt,
 	output `FunctPath  funct,
-	output `ConstantPath constat,
+	output `ConstantPath constant,
 	output `ALUCodePath  aluCode,
 	output `BrCodePath   brCode,
 	output logic pcWrEnable,		// PC 書き込みを行うかどうか
@@ -39,7 +39,7 @@ module Decoder(
 
 		shamt   = insn[ `SHAMT_POS   +: `SHAMT_WIDTH   ];
 		funct   = insn[ `FUNCT_POS   +: `FUNCT_WIDTH   ];
-		constat = insn[ `CONSTAT_POS +: `CONSTAT_WIDTH ];
+		constant = insn[ `CONSTANT_POS +: `CONSTANT_WIDTH ];
 
 		isShift = `FALSE;
 

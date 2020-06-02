@@ -53,6 +53,11 @@ module CPU(
 	`DataPath aluInA;			// ALU 入力A
 	`DataPath aluInB;			// ALU 入力B
 
+	// Forwarding
+	// `ForwardCodePath aluInASelectFromID;
+	// `ForwardCodePath aluInBSelectFromID;
+	// `ForwardCodePath aluInASelectToEX;
+	// `ForwardCodePath aluInBSelectToEX;
 	`DataPath dataFromWB;
 
 	// Pipeline
@@ -83,6 +88,7 @@ module CPU(
 	logic wrEnableToEX;
 	`RegNumPath wrNumToEX;
 
+
 	// MEMstage
 	`DataPath rdDataAToMEM;
 	`DataPath rdDataBToMEM;
@@ -98,7 +104,6 @@ module CPU(
 	`DataPath dataFromDMem;
 	logic pcWrEnableToIF;
 
-
 	// WBstage
 	`DataPath wrDataToWB;
 	`RegNumPath wrNumToWB;
@@ -113,7 +118,7 @@ module CPU(
 		.addrOut( pcOut ), // out
 
 		.addrIn( pcIn ), // in: 外部書き込みのアドレス
-		.wrEnable( pcWrEnable ) // in
+		.wrEnable( pcWrEnableToIF ) // in
 	);
 
 	// Branch Unit
@@ -124,7 +129,9 @@ module CPU(
 		.brCode( brCodeToMEM ), // in
 		.regRS( rdDataAToMEM ), // in
 		.regRT( rdDataBToMEM ), // in
-		.constant( constantToMEM ) // in
+		.constant( constantToMEM ), // in
+
+		.outPcWrEnable( pcWrEnableToIF ) // out
 	);
 
 	// Decoder
@@ -159,8 +166,8 @@ module CPU(
 		.rdNumB( dcRT ), // in
 
 		.wrData( rfWrData ), // in
-		.wrNum( rfWrNum ), // in
-		.wrEnable( rfWrEnable ) // in
+		.wrNum( wrNumToWB ), // in
+		.wrEnable( wrEnableToWB ) // in
 	);
 
 	ALU alu (
@@ -168,7 +175,7 @@ module CPU(
 
 		.aluInA( aluInA ), // in
 		.aluInB( aluInB ), // in
-		.code( dcALUCode ) // in
+		.code( aluCodeToEX ) // in
 	);
 
 	FirstStage firstStage(
@@ -202,7 +209,7 @@ module CPU(
 		.outRdDataB ( rdDataBToEX ),
 		.outWrNum ( wrNumToEX ),
 		.outWrEnable ( wrEnableToEX ),
-		.outconstant ( constantToEX ),
+		.outConstant ( constantToEX ),
 		.outOp ( opToEX ),
 		.outShamt ( shamtToEX ),
 		.outFunct ( functToEX ),
@@ -227,7 +234,7 @@ module CPU(
 		.inIsLoadInsn ( isLoadInsnToEX ),
 		.inIsStoreInsn ( isStoreInsnToEX ),
 		.inRgWrEnable ( wrEnableToEX ),
-		.inconstant ( constantToEX ),
+		.inConstant ( constantToEX ),
 		.inWrRg ( wrNumToEX ),
 		.inPcWrEnable ( pcWrEnableToEX ),
 
@@ -239,7 +246,7 @@ module CPU(
 		.outIsLoadInsn ( isLoadInsnToMEM ),
 		.outIsStoreInsn ( isStoreInsnToMEM ),
 		.outRgWrEnable ( wrEnableToMEM ),
-		.outconstant ( constantToMEM ),
+		.outConstant ( constantToMEM ),
 		.outWrRg ( wrNumToMEM ),
 		.outPcWrEnable ( pcWrEnableToMEM ),
 
@@ -251,12 +258,13 @@ module CPU(
 	FourthStage fourthStage(
 		.clk ( clk ),
 		.rst ( rst ),
+
 		.dataFromDMem ( dataFromDMem ),
 		.inWrNum (wrNumToMEM),
 		.inIsLoadInsn ( isLoadInsnToMEM ),
 		.wrEnable ( wrEnableToMEM ),
-
 		.aluOut ( aluOutToMEM ),
+
 		.outData ( wrDataToWB ),
 		.outWrNum ( wrNumToWB ),
 		.regWrite ( wrEnableToWB ),
@@ -264,13 +272,30 @@ module CPU(
 		.dataFromEX ( aluOutToWB )
 	);
 
+	// Forwarding forwarding(
+	// 	.rsNumFromID ( dcRS ),
+	// 	.rtNumFromID ( dcRT ),
+
+	// 	.wrNumFromEX ( wrNumToEX ),
+	// 	.rgWrEnableFromEX ( wrEnableToEX ),
+
+	// 	.wrNumFromMEM ( wrNumToMEM ),
+	// 	.rgWrEnableFromMEM ( wrEnableToMEM ),
+
+	// 	.wrNumFromWB ( wrNumToWB ),
+	// 	.rgWrEnableFromWB ( wrEnableToWB ),
+
+	// 	.aluInASelect ( aluInASelectFromID ),
+	// 	.aluInBSelect ( aluInBSelectFromID )
+	// );
+
 	always_comb begin
 		// IMem
 		imemInsnCode = insn;
 		insnAddr     = pcOut;
 
 		// Register write data
-		rfWrData = dcIsLoadInsn ? dataIn : aluOut;
+		rfWrData = isLoadInsnToWB ? wrDataToWB : aluOutToWB;
 
 		// Register write num
 		rfWrNum = dcIsDstRt ? dcRT : dcRD;

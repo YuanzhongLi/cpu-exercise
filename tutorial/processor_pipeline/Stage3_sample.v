@@ -1,5 +1,5 @@
 //
-//  –½—ßÀs‚ÆƒAƒhƒŒƒX¶¬‚Ì§Œä / ƒf[ƒ^ƒƒ‚ƒŠƒAƒNƒZƒX
+//  ï¿½ï¿½ï¿½ßï¿½ï¿½sï¿½ÆƒAï¿½hï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ / ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½Nï¿½Zï¿½X
 //
 
 `include "Types.v"
@@ -10,20 +10,20 @@ module ThirdStage(
 	input `DataPath inAluOut,
 	input `BrCodePath inBrCode,
 	input `DataPath dataFromRegister,
-	input logic inIsLoadInsn,		// ƒ[ƒh–½—ß‚©‚Ç‚¤‚©
-	input logic inIsStoreInsn,		// ƒXƒgƒA–½—ß‚©‚Ç‚¤‚©
+	input logic inIsLoadInsn,		// ï¿½ï¿½ï¿½[ï¿½hï¿½ï¿½ï¿½ß‚ï¿½ï¿½Ç‚ï¿½ï¿½ï¿½
+	input logic inIsStoreInsn,		// ï¿½Xï¿½gï¿½Aï¿½ï¿½ï¿½ß‚ï¿½ï¿½Ç‚ï¿½ï¿½ï¿½
 	input logic inRgWrEnable,
-	input `ConstantPath inConstat,
-	input `RegNumPath inWrRg,	// ‘‚«‚İƒŒƒWƒXƒ^”Ô†
+	input `ConstantPath inConstant,
+	input `RegNumPath inWrRg,	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İƒï¿½ï¿½Wï¿½Xï¿½^ï¿½Ôï¿½
 	input logic inPcWrEnable,
 
-	output `DataPath wrData,	// ƒf[ƒ^ƒƒ‚ƒŠ‚É‘‚«‚Ş“à—e
+	output `DataPath wrData,	// ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş“ï¿½ï¿½e
 	output `DataPath outAluOut,
 	output `BrCodePath outBrCode,
-	output logic outIsLoadInsn,		// ƒ[ƒh–½—ß‚©‚Ç‚¤‚©
-	output logic outIsStoreInsn,		// ƒXƒgƒA–½—ß‚©‚Ç‚¤‚©
+	output logic outIsLoadInsn,		// ï¿½ï¿½ï¿½[ï¿½hï¿½ï¿½ï¿½ß‚ï¿½ï¿½Ç‚ï¿½ï¿½ï¿½
+	output logic outIsStoreInsn,		// ï¿½Xï¿½gï¿½Aï¿½ï¿½ï¿½ß‚ï¿½ï¿½Ç‚ï¿½ï¿½ï¿½
 	output logic outRgWrEnable,
-	output `ConstantPath outConstat,
+	output `ConstantPath outConstant,
 	output `RegNumPath outWrRg,
 	output logic outPcWrEnable,
 
@@ -42,7 +42,7 @@ module ThirdStage(
 			outRgWrEnable <= `FALSE;
 			outWrRg <= `FALSE;
 			outBrCode <= `FALSE;
-			outConstat <= `FALSE;
+			outConstant <= `FALSE;
 			outPcWrEnable <= `FALSE;
 			outWrData <= `FALSE;
 		end
@@ -54,7 +54,7 @@ module ThirdStage(
 			outRgWrEnable <= `FALSE;
 			outWrRg <= `FALSE;
 			outBrCode <= `FALSE;
-			outConstat <= `FALSE;
+			outConstant <= `FALSE;
 			outPcWrEnable <= `FALSE;
 			outWrData <= inWrData;
 		end
@@ -66,7 +66,7 @@ module ThirdStage(
 			outRgWrEnable <= inRgWrEnable;
 			outWrRg <= inWrRg;
 			outBrCode <= inBrCode;
-			outConstat <= inConstat;
+			outConstant <= inConstant;
 			outPcWrEnable <= inPcWrEnable;
 			outWrData <= inWrData;
 		end
