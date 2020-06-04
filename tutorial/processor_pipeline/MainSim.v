@@ -84,7 +84,7 @@ module H3_MainSim;
 		//
 
 		// 100 サイクル
-		#(CYCLE_TIME*100000)
+		#(CYCLE_TIME*1000000)
 		$finish;
 
 	end
@@ -95,7 +95,7 @@ module H3_MainSim;
 		clk   = 1'b1;
 		cycle = 0;
 
-	    forever #(CYCLE_TIME / 2 / 4) begin
+	    forever #(CYCLE_TIME/2) begin
 	    	clk = !clk ;
 
 	    	if( countCycle ) begin
